@@ -1,0 +1,13 @@
+{
+  "presets": {
+    "zelda3": {},
+    "factorio":  {},
+    "zelda5": {},
+    "subnautica": {},
+    "minecraft": {},
+    "slay-the-spire": {},
+    "risk-of-rain-2": {},
+    "timespinner": {},
+    "metroid3": {}
+  }
+}

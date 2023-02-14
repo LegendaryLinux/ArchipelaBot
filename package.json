@@ -1,0 +1,26 @@
+{
+  "name": "aginah-bot",
+  "version": "2.0.0",
+  "license": "MIT",
+  "scripts": {
+    "production": "node bot.js",
+    "dev": "node --trace-warnings bot.js dev"
+  },
+  "dependencies": {
+    "7zip-bin": "^5.2.0",
+    "archipelago.js": "^0.4.1",
+    "axios": "^1.3.1",
+    "discord.js": "^14.7.1",
+    "form-data": "^4.0.0",
+    "moment-timezone": "^0.5.40",
+    "mysql2": "^2.3.3",
+    "node-emoji": "^1.11.0",
+    "request": "^2.88.2",
+    "tmp": "^0.2.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "depcheck": "^1.4.3",
+    "eslint": "^8.33.0"
+  }
+}
