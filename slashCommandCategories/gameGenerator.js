@@ -24,6 +24,7 @@ module.exports = {
           .setDescription('If true, a spoiler will not be generated')
           .setRequired(false)),
       async execute(interaction) {
+        await interaction.deferReply();
         const configFile = interaction.options.getAttachment('config-file');
         const raceMode = interaction.options.getBoolean('race-mode') ?? false;
 
@@ -50,11 +51,11 @@ module.exports = {
             const axiosOpts = { headers: formData.getHeaders() };
             axios.post(API_ENDPOINT, formData, axiosOpts)
               .then((apResponse) => {
-                interaction.reply('Seed generation underway. When it\'s ready, you will be ' +
+                interaction.followUp('Seed generation underway. When it\'s ready, you will be ' +
                                     `able to download your patch file from:\n${apResponse.data.url}`);
                 tempFile.removeCallback();
               }).catch((error) => {
-                interaction.reply('I couldn\'t generate that game, sorry.');
+                interaction.followUp({ content: 'I couldn\'t generate that game, sorry.', ephemeral: true });
                 if(error.isAxiosError && error.response && error.response.data){
                   console.error(`Unable to generate game on ${API_ENDPOINT}. The following ` +
                                       'data was returned from the endpoint:');

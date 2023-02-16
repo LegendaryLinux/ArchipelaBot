@@ -33,8 +33,11 @@ module.exports = {
         const password = interaction.options.getString('password', false) ?? null;
 
         if (interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('An Archipelago game is already being monitored in this channel ' +
-                      'and must be disconnected before a new game can be monitored.');
+          return interaction.followUp({
+            content: 'An Archipelago game is already being monitored in this channel ' +
+              'and must be disconnected before a new game can be monitored.',
+            ephemeral: true,
+          });
         }
 
         // Establish a connection to the Archipelago game
@@ -47,7 +50,10 @@ module.exports = {
 
           // If the client fails to connect, its status will eventually read disconnected
           if (APInterface.APClient.status === 'Disconnected') {
-            return interaction.followUp(`Unable to connect to AP server at ${serverAddress}.`);
+            return interaction.followUp({
+              content: `Unable to connect to AP server at ${serverAddress}.`,
+              ephemeral: true,
+            });
           }
 
           if (APInterface.APClient.status === 'Connected') {
@@ -75,7 +81,10 @@ module.exports = {
 
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Disconnect the ArchipelagoInterface from the game and destroy the object in tempData
@@ -99,7 +108,10 @@ module.exports = {
 
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Associate the user with the specified alias
@@ -122,7 +134,10 @@ module.exports = {
 
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Disassociate the user from the specified alias
@@ -139,7 +154,10 @@ module.exports = {
         await interaction.deferReply();
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Set the APInterface to show chat messages
@@ -156,7 +174,10 @@ module.exports = {
         await interaction.deferReply();
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Set the APInterface to show chat messages
@@ -173,7 +194,10 @@ module.exports = {
         await interaction.deferReply();
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Set the APInterface to show chat messages
@@ -190,7 +214,10 @@ module.exports = {
         await interaction.deferReply();
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Set the APInterface to show chat messages
@@ -207,7 +234,10 @@ module.exports = {
         await interaction.deferReply();
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Set the APInterface to show chat messages
@@ -225,7 +255,10 @@ module.exports = {
         await interaction.deferReply();
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Set the APInterface to show chat messages
@@ -243,7 +276,10 @@ module.exports = {
         await interaction.deferReply();
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp('There is no Archipelago game being monitored in this channel.');
+          return interaction.followUp({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
         }
 
         // Set the APInterface to show chat messages
