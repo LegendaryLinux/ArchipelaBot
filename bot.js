@@ -1,5 +1,6 @@
 const { Client, Events, GatewayIntentBits, Partials } = require('discord.js');
 const config = require('./config.json');
+const { cachePartial } = require('./lib');
 const { generalErrorHandler } = require('./errorHandlers');
 const fs = require('fs');
 
@@ -8,11 +9,11 @@ process.on('uncaughtException', (err) => generalErrorHandler(err));
 process.on('unhandledRejection', (err) => generalErrorHandler(err));
 
 const client = new Client({
-  partials: [ Partials.GuildMember, Partials.Message, Partials.Reaction ],
+  partials: [ Partials.GuildMember, Partials.Message ],
   intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.GuildMembers ],
+    GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent],
 });
-client.devMode = process.argv[2] && process.argv[2] === 'dev';
+client.messageListeners = [];
 client.slashCommandCategories = [];
 
 client.tempData = {
@@ -25,8 +26,28 @@ fs.readdirSync('./slashCommandCategories').filter((file) => file.endsWith('.js')
   client.slashCommandCategories.push(slashCommandCategory);
 });
 
+// Run messages through the listeners
+client.on(Events.MessageCreate, async (msg) => {
+  // Fetch message if partial
+  const message = await cachePartial(msg);
+  if (message.member) { message.member = await cachePartial(message.member); }
+  if (message.author) { message.author = await cachePartial(message.author); }
+
+  // Ignore all bot messages
+  if (message.author.bot) { return; }
+
+  // Run the message through the message listeners
+  return client.messageListeners.forEach((listener) => listener(client, message));
+});
+
 // Run the interactions through the interactionListeners
 client.on(Events.InteractionCreate, async(interaction) => {
+  // Load message listener files
+  fs.readdirSync('./messageListeners').filter((file) => file.endsWith('.js')).forEach((listenerFile) => {
+    const listener = require(`./messageListeners/${listenerFile}`);
+    client.messageListeners.push(listener);
+  });
+
   // Handle slash command interactions independently of other interactions
   if (interaction.isChatInputCommand()) {
     for (const listener of client.slashCommandCategories.commands) {
