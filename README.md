@@ -3,7 +3,7 @@ A Discord bot designed to provide Archipelago-specific functionality.
 Find it in use at the [Archipelago Discord](https://discord.gg/B5pjMYy).
 
 Install it to your server by clicking here:  
-[Install ArchipelaBot on your server!](https://discord.com/oauth2/authorize?client_id=1075564303610023967&scope=bot&permissions=274878024768)
+[Install ArchipelaBot on your server!](https://discord.com/oauth2/authorize?client_id=1075564303610023967&scope=bot&permissions=274878032960)
 
 ## Current Features
 - Automatically delete ROM files, and compressed files containing them
@@ -32,18 +32,18 @@ Example config:
 ```
 
 If you intend to create your own bot on Discord using the code in this repository, your bot will need
-permissions granted by the permissions integer `277025508416`.
+permissions granted by the permissions integer `274878032960`.
 
 The following permissions will be granted
 to ArchipelaBot:
 - View Channels
 - Send Messages
 - Send Messages in Threads
+- Manage Messages
 - Embed Links
 - Attach Files
 - Add Reactions
 - Read Message History
-- Use Application Commands
 
 ## Setup
 ```shell script
