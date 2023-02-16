@@ -16,8 +16,6 @@ are compatible and have full MultiWorld compatibility with each other.
 
 ## Prerequisites
 - `node` and `npm` should be installed to run the bot and install dependencies
-- `unrar` should be installed on your system to process `.rar` files.
-- A MySQL 8 server should be installed, and a database available.
 
 ## Configuration
 A `config.json` file is required to be present in the base directory of the repository. This file should contain
