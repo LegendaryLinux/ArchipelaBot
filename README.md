@@ -2,6 +2,9 @@
 A Discord bot designed to provide Archipelago-specific functionality.
 Find it in use at the [Archipelago Discord](https://discord.gg/B5pjMYy).
 
+Install it to your server by clicking here:  
+[Install ArchipelaBot on your server!](https://discord.com/oauth2/authorize?client_id=1075564303610023967&scope=bot&permissions=277025508416)
+
 ## Current Features
 - Automatically delete ROM files, and compressed files containing them
 - Generate single-player or multiplayer games using the `generate` command

@@ -14,11 +14,24 @@ const client = new Client({
     GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent],
 });
 client.messageListeners = [];
+client.channelDeletedListeners = [];
 client.slashCommandCategories = [];
 
 client.tempData = {
   apInterfaces: new Map(),
 };
+
+// Load message listener files
+fs.readdirSync('./messageListeners').filter((file) => file.endsWith('.js')).forEach((listenerFile) => {
+  const listener = require(`./messageListeners/${listenerFile}`);
+  client.messageListeners.push(listener);
+});
+
+// Load channelDeleted listeners
+fs.readdirSync('./channelDeletedListeners').filter((file) => file.endsWith('.js')).forEach((listenerFile) => {
+  const listener = require(`./channelDeletedListeners/${listenerFile}`);
+  client.channelDeletedListeners.push(listener);
+});
 
 // Load slash command category files
 fs.readdirSync('./slashCommandCategories').filter((file) => file.endsWith('.js')).forEach((categoryFile) => {
@@ -40,14 +53,13 @@ client.on(Events.MessageCreate, async (msg) => {
   return client.messageListeners.forEach((listener) => listener(client, message));
 });
 
+// Run channelDelete events through their listeners
+client.on(Events.ChannelDelete, async(channel) => {
+  client.channelDeletedListeners.forEach((listener) => listener(client, channel));
+});
+
 // Run the interactions through the interactionListeners
 client.on(Events.InteractionCreate, async(interaction) => {
-  // Load message listener files
-  fs.readdirSync('./messageListeners').filter((file) => file.endsWith('.js')).forEach((listenerFile) => {
-    const listener = require(`./messageListeners/${listenerFile}`);
-    client.messageListeners.push(listener);
-  });
-
   // Handle slash command interactions independently of other interactions
   if (interaction.isChatInputCommand()) {
     for (const listener of client.slashCommandCategories.commands) {
