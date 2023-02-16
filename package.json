@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "production": "node bot.js",
-    "dev": "node --trace-warnings bot.js dev"
+    "dev": "node --trace-warnings bot.js",
+    "registerCommands": "node scripts/registerSlashCommands.js"
   },
   "dependencies": {
     "archipelago.js": "^0.4.1",

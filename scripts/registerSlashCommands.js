@@ -1,19 +1,21 @@
 const { REST, Routes } = require('discord.js');
 const config = require('../config.json');
 const fs = require('node:fs');
+const path = require('path');
 
 const slashCommands = [];
 
 // Find all .js files in the /slashCommandCategories directory
-const slashCommandFiles = fs.readdirSync('../slashCommandCategories').filter(file => file.endsWith('.js'));
+const slashCommandFiles = fs.readdirSync(path.resolve(__filename, '..', '..', 'slashCommandCategories'))
+  .filter(file => file.endsWith('.js'));
 
 // Load each command file into memory
 for (const file of slashCommandFiles) {
-  const commandFile = require(file);
+  const commandFile = require(path.resolve(__filename, '..', '..', 'slashCommandCategories', file));
 
   // Load all slash commands from each command file
   for (const command of commandFile.commands) {
-    slashCommands.push(command.data.toJSON());
+    slashCommands.push(command.commandBuilder.toJSON());
   }
 }
 
