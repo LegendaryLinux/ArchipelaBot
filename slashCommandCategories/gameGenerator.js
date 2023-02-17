@@ -24,7 +24,7 @@ module.exports = {
           .setDescription('If true, a spoiler will not be generated')
           .setRequired(false)),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply();
         const configFile = interaction.options.getAttachment('config-file');
         const raceMode = interaction.options.getBoolean('race-mode') ?? false;
 
@@ -51,12 +51,11 @@ module.exports = {
             const axiosOpts = { headers: formData.getHeaders() };
             axios.post(API_ENDPOINT, formData, axiosOpts)
               .then(async (apResponse) => {
-                await interaction.deleteReply();
                 await interaction.followUp('Seed generation underway. When it\'s ready, you will be ' +
                                     `able to download your patch file from:\n${apResponse.data.url}`);
                 tempFile.removeCallback();
-              }).catch((error) => {
-                interaction.followUp({ content: 'I couldn\'t generate that game, sorry.', ephemeral: true });
+              }).catch(async (error) => {
+                await interaction.reply({ content: 'The Archipelago API was unable to generate your game.' });
                 if(error.isAxiosError && error.response && error.response.data){
                   console.error(`Unable to generate game on ${API_ENDPOINT}. The following ` +
                                       'data was returned from the endpoint:');

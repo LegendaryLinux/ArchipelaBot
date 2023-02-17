@@ -26,14 +26,13 @@ module.exports = {
           .setDescription('Optional password required to connect to the server')
           .setRequired(false)),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         const serverAddress = interaction.options.getString('server-address');
         const gameName = interaction.options.getString('game-name');
         const slotName = interaction.options.getString('slot-name');
         const password = interaction.options.getString('password', false) ?? null;
 
         if (interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'An Archipelago game is already being monitored in this channel ' +
               'and must be disconnected before a new game can be monitored.',
             ephemeral: true,
@@ -50,7 +49,7 @@ module.exports = {
 
           // If the client fails to connect, its status will eventually read disconnected
           if (APInterface.APClient.status === 'Disconnected') {
-            return interaction.followUp({
+            return interaction.reply({
               content: `Unable to connect to AP server at ${serverAddress}.`,
               ephemeral: true,
             });
@@ -58,8 +57,7 @@ module.exports = {
 
           if (APInterface.APClient.status === 'Connected') {
             interaction.client.tempData.apInterfaces.set(interaction.channel.id, APInterface);
-            await interaction.deleteReply();
-            await interaction.followUp(`Connected to ${serverAddress} using game ${gameName} with slot ${slotName}.`);
+            await interaction.reply(`Connected to ${serverAddress} using game ${gameName} with slot ${slotName}.`);
 
             // Automatically disconnect and destroy this interface after six hours
             return setTimeout(() => {
@@ -78,11 +76,9 @@ module.exports = {
         .setDescription('Stop monitoring an Archipelago game in the current text channel')
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
-
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -91,8 +87,7 @@ module.exports = {
         // Disconnect the ArchipelagoInterface from the game and destroy the object in tempData
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).disconnect();
         interaction.client.tempData.apInterfaces.delete(interaction.channel.id);
-        await interaction.deleteReply();
-        return interaction.followUp('Disconnected from Archipelago game.');
+        return interaction.reply('Disconnected from Archipelago game.');
       },
     },
     {
@@ -105,12 +100,11 @@ module.exports = {
           .setRequired(true))
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         const alias = interaction.options.getString('alias');
 
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -118,8 +112,7 @@ module.exports = {
 
         // Associate the user with the specified alias
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).setPlayer(alias, interaction.user);
-        await interaction.deleteReply();
-        return interaction.followUp(`Associated ${interaction.user} with alias ${alias}.`);
+        return interaction.reply(`Associated ${interaction.user} with alias ${alias}.`);
       },
     },
     {
@@ -132,12 +125,11 @@ module.exports = {
           .setRequired(true))
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         const alias = interaction.options.getString('alias');
 
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -145,8 +137,7 @@ module.exports = {
 
         // Disassociate the user from the specified alias
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).unsetPlayer(alias);
-        await interaction.deleteReply();
-        return interaction.followUp(`User ${interaction.user} disassociated from ${alias}.`);
+        return interaction.reply(`User ${interaction.user} disassociated from ${alias}.`);
       },
     },
     {
@@ -155,10 +146,9 @@ module.exports = {
         .setDescription('Show normal messages while connected to an AP game')
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -166,8 +156,7 @@ module.exports = {
 
         // Set the APInterface to show chat messages
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showChat = true;
-        await interaction.deleteReply();
-        return interaction.followUp('Showing normal chat messages.');
+        return interaction.reply('Showing normal chat messages.');
       },
     },
     {
@@ -176,10 +165,9 @@ module.exports = {
         .setDescription('Hide normal messages while connected to an AP game')
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -187,8 +175,7 @@ module.exports = {
 
         // Set the APInterface to show chat messages
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showChat = false;
-        await interaction.deleteReply();
-        return interaction.followUp('Hiding normal chat messages.');
+        return interaction.reply('Hiding normal chat messages.');
       },
     },
     {
@@ -197,10 +184,9 @@ module.exports = {
         .setDescription('Show hint messages while connected to an AP game')
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -208,8 +194,7 @@ module.exports = {
 
         // Set the APInterface to show chat messages
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showHints = true;
-        await interaction.deleteReply();
-        return interaction.followUp('Showing hints.');
+        return interaction.reply('Showing hints.');
       },
     },
     {
@@ -218,10 +203,9 @@ module.exports = {
         .setDescription('Hide hint messages while connected to an AP game')
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -229,8 +213,7 @@ module.exports = {
 
         // Set the APInterface to show chat messages
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showHints = false;
-        await interaction.deleteReply();
-        return interaction.followUp('Hiding hints.');
+        return interaction.reply('Hiding hints.');
       },
     },
     {
@@ -239,10 +222,9 @@ module.exports = {
         .setDescription('Show progression item messages while connected to an AP game. Hides other item messages')
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -251,8 +233,7 @@ module.exports = {
         // Set the APInterface to show chat messages
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showItems = false;
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showProgression = true;
-        await interaction.deleteReply();
-        return interaction.followUp('Showing progression.');
+        return interaction.reply('Showing progression.');
       },
     },
     {
@@ -261,10 +242,9 @@ module.exports = {
         .setDescription('Show all item messages while connected to an AP game')
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -273,8 +253,7 @@ module.exports = {
         // Set the APInterface to show chat messages
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showItems = true;
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showProgression = true;
-        await interaction.deleteReply();
-        return interaction.followUp('Showing all item messages.');
+        return interaction.reply('Showing all item messages.');
       },
     },
     {
@@ -283,10 +262,9 @@ module.exports = {
         .setDescription('Hide all item messages while connected to an AP game')
         .setDMPermission(false),
       async execute(interaction) {
-        await interaction.deferReply({ ephemeral: true });
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.followUp({
+          return interaction.reply({
             content: 'There is no Archipelago game being monitored in this channel.',
             ephemeral: true,
           });
@@ -295,8 +273,7 @@ module.exports = {
         // Set the APInterface to show chat messages
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showItems = false;
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showProgression = false;
-        await interaction.deleteReply();
-        return interaction.followUp('Hiding all item messages.');
+        return interaction.reply('Hiding all item messages.');
       },
     },
   ],
