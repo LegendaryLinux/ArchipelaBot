@@ -24,7 +24,7 @@ module.exports = {
           .setDescription('If true, a spoiler will not be generated')
           .setRequired(false)),
       async execute(interaction) {
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: true });
         const configFile = interaction.options.getAttachment('config-file');
         const raceMode = interaction.options.getBoolean('race-mode') ?? false;
 
@@ -50,8 +50,9 @@ module.exports = {
             formData.append('race', race);
             const axiosOpts = { headers: formData.getHeaders() };
             axios.post(API_ENDPOINT, formData, axiosOpts)
-              .then((apResponse) => {
-                interaction.followUp('Seed generation underway. When it\'s ready, you will be ' +
+              .then(async (apResponse) => {
+                await interaction.deleteReply();
+                await interaction.followUp('Seed generation underway. When it\'s ready, you will be ' +
                                     `able to download your patch file from:\n${apResponse.data.url}`);
                 tempFile.removeCallback();
               }).catch((error) => {
