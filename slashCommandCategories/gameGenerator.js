@@ -19,21 +19,41 @@ module.exports = {
           .setName('config-file')
           .setDescription('Archipelago config file')
           .setRequired(true))
-        .addBooleanOption((opt) => opt
-          .setName('race-mode')
-          .setDescription('If true, a spoiler will not be generated')
-          .setRequired(false)),
+        .addStringOption((opt) => opt
+          .setName('mode')
+          .setDescription('Generate this game normally, or with race or tournament presets')
+          .setRequired(false)
+          .addChoices(
+            { name: 'Normal', value: 'normal' },
+            { name: 'Race', value: 'race' },
+            { name: 'Tournament', value: 'tournament' },
+          )),
       async execute(interaction) {
         await interaction.deferReply();
         const configFile = interaction.options.getAttachment('config-file');
-        const raceMode = interaction.options.getBoolean('race-mode') ?? false;
+        const mode = interaction.options.getString('mode', false) ?? 'normal';
 
-        // Handle requests to generate a game from a file
-        let race = raceMode ? '1' : '0';
+        // Default settings
+        let race = '0';
         let hintCost = '10';
         let forfeitMode = 'auto';
         let remainingMode = 'disabled';
-        let collectMode = raceMode ? 'disabled' : 'goal';
+        let collectMode = 'goal';
+
+        switch(mode){
+          case 'race':
+            race = '1';
+            collectMode = 'disabled';
+            break;
+
+          case 'tournament':
+            race = '1';
+            hintCost = '101';
+            forfeitMode = 'disabled';
+            remainingMode = 'disabled';
+            collectMode = 'disabled';
+            break;
+        }
 
         const postfix = '.' + configFile.name.split('.').reverse()[0];
         const tempFile = tmp.fileSync({ prefix: 'upload-', postfix });
