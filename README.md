@@ -27,7 +27,8 @@ your Discord bot's secret key.
 Example config:
 ```json
 {
-  "token": "discord-bot-token"
+  "token": "discord-bot-token",
+  "clientId": "application-client-id"
 }
 ```
 
