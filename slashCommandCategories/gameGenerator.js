@@ -1,5 +1,4 @@
 const axios = require('axios');
-const request = require('request');
 const FormData = require('form-data');
 const tmp = require('tmp');
 const fs = require('fs');
@@ -57,8 +56,8 @@ module.exports = {
 
         const postfix = '.' + configFile.name.split('.').reverse()[0];
         const tempFile = tmp.fileSync({ prefix: 'upload-', postfix });
-        return request.get(configFile.url)
-          .pipe(fs.createWriteStream(tempFile.name))
+        const response = await axios.get(configFile.url, { responseType: 'stream' });
+        return response.data.pipe(fs.createWriteStream(tempFile.name))
           .on('close', () => {
             // Send request to api
             const formData = new FormData();

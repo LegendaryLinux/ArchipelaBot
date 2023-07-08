@@ -11,7 +11,11 @@ module.exports = {
         .setDMPermission(false)
         .addStringOption((opt) => opt
           .setName('server-address')
-          .setDescription('Server address and port (ex. archipelago.gg:12345) of the Archipelago server to connect to')
+          .setDescription('Server address and port (ex. archipelago.gg) of the Archipelago server to connect to')
+          .setRequired(true))
+        .addNumberOption((opt) => opt
+          .setName('port')
+          .setDescription('Port number your game is hosted on')
           .setRequired(true))
         .addStringOption((opt) => opt
           .setName('game-name')
@@ -27,6 +31,7 @@ module.exports = {
           .setRequired(false)),
       async execute(interaction) {
         const serverAddress = interaction.options.getString('server-address');
+        const port = interaction.options.getNumber('port');
         const gameName = interaction.options.getString('game-name');
         const slotName = interaction.options.getString('slot-name');
         const password = interaction.options.getString('password', false) ?? null;
@@ -40,7 +45,8 @@ module.exports = {
         }
 
         // Establish a connection to the Archipelago game
-        const APInterface = new ArchipelagoInterface(interaction.channel, serverAddress, gameName, slotName, password);
+        const APInterface = new ArchipelagoInterface(interaction.channel, serverAddress, port,
+          gameName, slotName, password);
 
         // Check if the connection was successful every half second for ten seconds
         for (let i=0; i<20; ++i){

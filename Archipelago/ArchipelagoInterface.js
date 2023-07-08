@@ -1,24 +1,24 @@
-const { ArchipelagoClient, ItemsHandlingFlags, SessionStatus } = require('archipelago.js');
+const { Client, ITEMS_HANDLING_FLAGS, SERVER_PACKET_TYPE, ConnectionStatus } = require('archipelago.js');
 const { User } = require('discord.js');
 const { v4: uuid } = require('uuid');
 
 class ArchipelagoInterface {
-  version = { major: 0, minor: 4, build: 0 };
-  itemsHandling = ItemsHandlingFlags.REMOTE_ALL;
-
-
   /**
    * @param textChannel discord.js TextChannel
    * @param {string} host
+   * @param {Number} port
    * @param {string} gameName
    * @param {string} slotName
    * @param {string|null} password optional
    */
-  constructor(textChannel, host, gameName, slotName, password=null) {
+  constructor(textChannel, host, port, gameName, slotName, password=null) {
     this.textChannel = textChannel;
     this.messageQueue = [];
     this.players = new Map();
-    this.APClient = new ArchipelagoClient(host);
+    this.APClient = new Client();
+
+    this.gameName = gameName;
+    this.slotName = slotName;
 
     // Controls which messages should be printed to the channel
     this.showHints = true;
@@ -26,23 +26,30 @@ class ArchipelagoInterface {
     this.showProgression = true;
     this.showChat = true;
 
-    this.APClient.connect({
+    const connectionInfo = {
+      hostname: host,
+      port,
       uuid: uuid(),
       game: gameName,
       name: slotName,
-      version: this.version,
-      items_handling: this.itemsHandling,
-    }).then(() => {
+      items_handling: ITEMS_HANDLING_FLAGS.REMOTE_ALL,
+    };
+
+    this.APClient.connect(connectionInfo).then(() => {
       // Start handling queued messages
       this.queueTimeout = setTimeout(this.queueHandler, 5000);
 
       // Set up packet listeners
-      this.APClient.addListener('print', this.printHandler);
-      this.APClient.addListener('printJSON', this.printJSONHandler);
+      // this.APClient.addListener(SERVER_PACKET_TYPE.PRINT, this.printHandler);
+      this.APClient.addListener(SERVER_PACKET_TYPE.PRINT_JSON, this.printJSONHandler);
 
       // Inform the user AginahBot has connected to the game
       textChannel.send('Connection established.');
     }).catch(async (err) => {
+      console.error('Error while trying to connect with connectionInfo:');
+      console.error(connectionInfo);
+      console.error('With trace:');
+      console.error(err);
       await this.textChannel.send('A problem occurred while connecting to the AP server:\n' +
         `\`\`\`${JSON.stringify(err)}\`\`\``);
     });
@@ -120,9 +127,10 @@ class ArchipelagoInterface {
   /**
    * Listen for a printJSON packet, convert it to a human-readable format, and add the message to the queue
    * @param {Object} packet
+   * @param {String} rawMessage
    * @returns {Promise<void>}
    */
-  printJSONHandler = async (packet) => {
+  printJSONHandler = async (packet, rawMessage) => {
     let message = { type: 'chat', content: '', };
     packet.data.forEach((part) => {
       // Plain text parts do not have a "type" property
@@ -137,7 +145,7 @@ class ArchipelagoInterface {
           break;
 
         case 'item_id':
-          message.content += '**'+this.APClient.items.name(parseInt(part.text, 10))+'**';
+          message.content += '**'+this.APClient.items.name(this.gameName, parseInt(part.text, 10))+'**';
 
           // Identify this message as containing an item
           if (message.type !== 'progression') { message.type = 'item'; }
@@ -147,7 +155,7 @@ class ArchipelagoInterface {
           break;
 
         case 'location_id':
-          message.content += '**'+this.APClient.locations.name(parseInt(part.text, 10))+'**';
+          message.content += '**'+this.APClient.locations.name(this.gameName, parseInt(part.text, 10))+'**';
           break;
 
         case 'color':
@@ -161,7 +169,7 @@ class ArchipelagoInterface {
     });
 
     // Identify hint messages
-    if (message.content.includes('[Hint]')) { message.type = 'hint'; }
+    if (rawMessage.includes('[Hint]')) { message.type = 'hint'; }
 
     this.messageQueue.push(message);
   };
@@ -183,7 +191,7 @@ class ArchipelagoInterface {
 
   /**
    * Determine the status of the ArchipelagoClient object
-   * @returns {SessionStatus}
+   * @returns {ConnectionStatus}
    */
   getStatus = () => this.APClient.status;
 
