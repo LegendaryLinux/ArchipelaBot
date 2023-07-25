@@ -132,6 +132,13 @@ class ArchipelagoInterface {
    */
   printJSONHandler = async (packet, rawMessage) => {
     let message = { type: 'chat', content: '', };
+
+    if (!['ItemSend', 'ItemCheat', 'Hint'].includes(packet.type)) {
+      message.content = rawMessage;
+      this.messageQueue.push(message);
+      return;
+    }
+
     packet.data.forEach((part) => {
       // Plain text parts do not have a "type" property
       if (!part.hasOwnProperty('type') && part.hasOwnProperty('text')) {
@@ -145,7 +152,8 @@ class ArchipelagoInterface {
           break;
 
         case 'item_id':
-          message.content += '**'+this.APClient.items.name(this.gameName, parseInt(part.text, 10))+'**';
+          const itemName = this.APClient.players.get(packet.receiving).item(parseInt(part.text, 10));
+          message.content += `**${itemName}**`;
 
           // Identify this message as containing an item
           if (message.type !== 'progression') { message.type = 'item'; }
@@ -155,7 +163,8 @@ class ArchipelagoInterface {
           break;
 
         case 'location_id':
-          message.content += '**'+this.APClient.locations.name(this.gameName, parseInt(part.text, 10))+'**';
+          const locationName = this.APClient.players.get(packet.item.player).location(parseInt(part.text, 10));
+          message.content += `**${locationName}**`;
           break;
 
         case 'color':
