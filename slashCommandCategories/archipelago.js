@@ -48,22 +48,17 @@ module.exports = {
         const APInterface = new ArchipelagoInterface(interaction.channel, serverAddress, port,
           gameName, slotName, password);
 
-        // Check if the connection was successful every half second for ten seconds
-        for (let i=0; i<20; ++i){
+        // Check if the connection was successful every half second for five seconds
+        for (let i=0; i<10; ++i){
           // Wait half of a second
           await new Promise((resolve) => (setTimeout(resolve, 500)));
 
-          // If the client fails to connect, its status will eventually read disconnected
-          if (APInterface.APClient.status === 'Disconnected') {
-            return interaction.reply({
-              content: `Unable to connect to AP server at ${serverAddress}.`,
-              ephemeral: true,
-            });
-          }
-
           if (APInterface.APClient.status === 'Connected') {
             interaction.client.tempData.apInterfaces.set(interaction.channel.id, APInterface);
-            await interaction.reply(`Connected to ${serverAddress} using game ${gameName} with slot ${slotName}.`);
+            await interaction.reply({
+              content: `Connected to ${serverAddress} using game ${gameName} with slot ${slotName}.`,
+              ephemeral: false,
+            });
 
             // Automatically disconnect and destroy this interface after six hours
             return setTimeout(() => {
@@ -74,6 +69,12 @@ module.exports = {
             }, 21600000);
           }
         }
+
+        // If the client fails to connect, notify the user
+        return interaction.reply({
+          content: `Unable to connect to AP server at ${serverAddress}.`,
+          ephemeral: false,
+        });
       },
     },
     {

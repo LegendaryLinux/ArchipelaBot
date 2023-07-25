@@ -43,7 +43,7 @@ class ArchipelagoInterface {
       // this.APClient.addListener(SERVER_PACKET_TYPE.PRINT, this.printHandler);
       this.APClient.addListener(SERVER_PACKET_TYPE.PRINT_JSON, this.printJSONHandler);
 
-      // Inform the user AginahBot has connected to the game
+      // Inform the user ArchipelaBot has connected to the game
       textChannel.send('Connection established.');
     }).catch(async (err) => {
       console.error('Error while trying to connect with connectionInfo:');
