@@ -9,15 +9,15 @@
   },
   "dependencies": {
     "archipelago.js": "^1.1.0",
-    "axios": "^1.4.0",
-    "discord.js": "^14.11.0",
+    "axios": "^1.5.0",
+    "discord.js": "^14.13.0",
     "form-data": "^4.0.0",
     "moment-timezone": "^0.5.43",
     "tmp": "^0.2.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "depcheck": "^1.4.3",
-    "eslint": "^8.44.0"
+    "depcheck": "^1.4.5",
+    "eslint": "^8.48.0"
   }
 }
