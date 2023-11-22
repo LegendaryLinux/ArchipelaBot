@@ -199,6 +199,12 @@ class ArchipelagoInterface {
   unsetPlayer = (alias) => this.players.delete(alias);
 
   /**
+   * Get the aliases map
+   * @returns {Map}
+   */
+  getAliases = () => this.players;
+
+  /**
    * Determine the status of the ArchipelagoClient object
    * @returns {ConnectionStatus}
    */

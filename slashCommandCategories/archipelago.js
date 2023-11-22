@@ -143,8 +143,20 @@ module.exports = {
         }
 
         // Disassociate the user from the specified alias
-        interaction.client.tempData.apInterfaces.get(interaction.channel.id).unsetPlayer(alias);
-        return interaction.reply(`User ${interaction.user} disassociated from ${alias}.`);
+        let channelInterface = interaction.client.tempData.apInterfaces.get(interaction.channel.id)
+        let aliases = channelInterface.getAliases()
+
+        if (!aliases.has(alias)) {
+          return interaction.reply(`Alias ${alias} is not associated with anyone.`);
+        }
+        
+        let associatedUser = aliases.get(alias)
+        if (associatedUser != interaction.user) {
+          return interaction.reply(`Alias ${alias} is associated with ${associatedUser}, not you.`);
+        }
+
+        channelInterface.unsetPlayer(alias);
+        return interaction.reply(`User ${associatedUser} disassociated from ${alias}.`);
       },
     },
     {
