@@ -30,6 +30,7 @@ class ArchipelagoInterface {
       uuid: uuid(),
       game: "", // Copying the behavior of the official Text client
       name: slotName,
+      password: password,
       tags: [COMMON_TAGS.TEXT_ONLY],
       items_handling: ITEMS_HANDLING_FLAGS.LOCAL_ONLY,
     };
