@@ -16,7 +16,7 @@ module.exports = {
         .setDMPermission(true)
         .addAttachmentOption((opt) => opt
           .setName('config-file')
-          .setDescription('Archipelago config file')
+          .setDescription('Archipelago yaml, json, or zip file')
           .setRequired(true))
         .addStringOption((opt) => opt
           .setName('mode')
@@ -74,13 +74,15 @@ module.exports = {
                                     `able to download your patch file from:\n${apResponse.data.url}`);
                 tempFile.removeCallback();
               }).catch(async (error) => {
-                await interaction.reply({ content: 'The Archipelago API was unable to generate your game.' });
+                let responseText = 'The Archipelago API was unable to generate your game.';
                 if(error.isAxiosError && error.response && error.response.data){
+                  responseText += `\nThe following data was returned from the endpoint (${API_ENDPOINT}):` +
+                    `\n\`\`\`${JSON.stringify(error.response.data)}\`\`\``;
                   console.error(`Unable to generate game on ${API_ENDPOINT}. The following ` +
-                                      'data was returned from the endpoint:');
-                  return console.error(error.response.data);
+                    `data was returned from the endpoint:\n${JSON.stringify(error.response.data)}`);
+                  console.error(error.response.data);
                 }
-
+                await interaction.followUp({ content: responseText });
                 return console.error(error);
               });
           });
