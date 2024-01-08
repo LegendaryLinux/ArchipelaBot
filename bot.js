@@ -11,7 +11,7 @@ process.on('unhandledRejection', (err) => generalErrorHandler(err));
 const client = new Client({
   partials: [ Partials.GuildMember, Partials.Message ],
   intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent],
+    GatewayIntentBits.MessageContent],
 });
 client.messageListeners = [];
 client.channelDeletedListeners = [];
