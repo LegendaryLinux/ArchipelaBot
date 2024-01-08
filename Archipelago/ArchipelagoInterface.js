@@ -28,7 +28,7 @@ class ArchipelagoInterface {
       hostname: host,
       port,
       uuid: uuid(),
-      game: "", // Copying the behavior of the official Text client
+      game: '', // Copying the behavior of the official Text client
       name: slotName,
       password: password,
       tags: [COMMON_TAGS.TEXT_ONLY],
