@@ -1,4 +1,3 @@
-const { Client, GuildChannel } = require('discord.js');
 /**
  * If a channel is deleted and there was an ArchipelagoInterface attached to it, disconnect and delete that interface
  * @param {Client} client
