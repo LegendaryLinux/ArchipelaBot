@@ -1,4 +1,4 @@
-const { Client, Events, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, Events, GatewayIntentBits, Partials, REST, Routes } = require('discord.js');
 const config = require('./config.json');
 const { cachePartial } = require('./lib');
 const { generalErrorHandler } = require('./errorHandlers');
@@ -21,12 +21,6 @@ client.tempData = {
   apInterfaces: new Map(),
 };
 
-// Load message listener files
-fs.readdirSync('./messageListeners').filter((file) => file.endsWith('.js')).forEach((listenerFile) => {
-  const listener = require(`./messageListeners/${listenerFile}`);
-  client.messageListeners.push(listener);
-});
-
 // Load channelDeleted listeners
 fs.readdirSync('./channelDeletedListeners').filter((file) => file.endsWith('.js')).forEach((listenerFile) => {
   const listener = require(`./channelDeletedListeners/${listenerFile}`);
@@ -37,20 +31,6 @@ fs.readdirSync('./channelDeletedListeners').filter((file) => file.endsWith('.js'
 fs.readdirSync('./slashCommandCategories').filter((file) => file.endsWith('.js')).forEach((categoryFile) => {
   const slashCommandCategory = require(`./slashCommandCategories/${categoryFile}`);
   client.slashCommandCategories.push(slashCommandCategory);
-});
-
-// Run messages through the listeners
-client.on(Events.MessageCreate, async (msg) => {
-  // Fetch message if partial
-  const message = await cachePartial(msg);
-  if (message.member) { message.member = await cachePartial(message.member); }
-  if (message.author) { message.author = await cachePartial(message.author); }
-
-  // Ignore all bot messages
-  if (message.author.bot) { return; }
-
-  // Run the message through the message listeners
-  return client.messageListeners.forEach((listener) => listener(client, message));
 });
 
 // Run channelDelete events through their listeners
@@ -71,7 +51,6 @@ client.on(Events.InteractionCreate, async(interaction) => {
     }
 
     // If this slash command has no known listener, notify the user and log a warning
-    console.warn(`Unknown slash command received: ${interaction.commandName}`);
     return interaction.reply('Unknown command.');
   }
 });
