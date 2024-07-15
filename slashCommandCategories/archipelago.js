@@ -1,4 +1,5 @@
 const ArchipelagoInterface = require('../Archipelago/ArchipelagoInterface');
+const config = require('../config.json');
 const { SlashCommandBuilder } = require('discord.js');
 const { AsciiTable3, AlignmentEnum } = require('ascii-table3');
 
@@ -13,24 +14,37 @@ module.exports = {
         .addStringOption((opt) => opt
           .setName('server-address')
           .setDescription('Server address and port (ex. archipelago.gg) of the Archipelago server to connect to')
-          .setRequired(true))
+          .setRequired(false))
         .addNumberOption((opt) => opt
           .setName('port')
           .setDescription('Port number your game is hosted on')
-          .setRequired(true))
+          .setRequired(false))
         .addStringOption((opt) => opt
           .setName('slot-name')
           .setDescription('`name` field in your settings file')
-          .setRequired(true))
+          .setRequired(false))
         .addStringOption((opt) => opt
           .setName('password')
           .setDescription('Optional password required to connect to the server')
           .setRequired(false)),
       async execute(interaction) {
-        const serverAddress = interaction.options.getString('server-address');
-        const port = interaction.options.getNumber('port');
-        const slotName = interaction.options.getString('slot-name');
-        const password = interaction.options.getString('password', false) ?? null;
+        serverAddress = interaction.options.getString('server-address', false) ?? null;
+        port = interaction.options.getNumber('port', false) ?? null;
+        slotName = interaction.options.getString('slot-name', false) ?? null;
+        password = interaction.options.getString('password', false) ?? null;
+
+        if (serverAddress === null) {
+          serverAddress = config.serverAddress ?? "127.0.0.1";    
+        }
+        if (port === null) {
+          port = Number(config.port) ?? 12345;
+        }
+        if (slotName === null) {
+          slotName = config.slotName ?? "no name";
+        }
+        if (password === null) {
+          password = config.password ?? null;
+        }
 
         if (interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
           return interaction.reply({
@@ -39,7 +53,7 @@ module.exports = {
             ephemeral: true,
           });
         }
-
+        
         // Establish a connection to the Archipelago game
         const APInterface = new ArchipelagoInterface(interaction.channel, serverAddress, port,
           slotName, password);
@@ -56,13 +70,28 @@ module.exports = {
               ephemeral: false,
             });
 
-            // Automatically disconnect and destroy this interface after six hours
+            // TODO: The following does not work. status doesn't seem to be a good way to check 
+            // for disconnects. Replace with auto reconnect behavior based on some pinging method. 
+            // Until then, the following will run forever.
+
+            // Make this run until not longer connected to the AP server.
+	          while (APInterface.APClient.status === 'Connected') {	
+              //console.log("Still connected to server");
+              await new Promise((resolve) => (setTimeout(resolve, 5000)));
+		        }
+
+            await interaction.reply({
+		          content: `Disconnected from AP server at ${serverAddress}.`,
+		          ephemeral: false,
+		        });
+
             return setTimeout(() => {
+              console.log("Lost connection with AP server.");
               if (interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
                 interaction.client.tempData.apInterfaces.get(interaction.channel.id).disconnect();
                 interaction.client.tempData.apInterfaces.delete(interaction.channel.id);
               }
-            }, 21600000);
+            }, 5000);
           }
         }
 

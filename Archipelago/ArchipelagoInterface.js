@@ -22,7 +22,7 @@ class ArchipelagoInterface {
     this.showHints = true;
     this.showItems = true;
     this.showProgression = true;
-    this.showChat = true;
+    this.showChat = false;
 
     const connectionInfo = {
       hostname: host,
@@ -37,7 +37,7 @@ class ArchipelagoInterface {
 
     this.APClient.connect(connectionInfo).then(() => {
       // Start handling queued messages
-      this.queueTimeout = setTimeout(this.queueHandler, 5000);
+      this.queueTimeout = setTimeout(this.queueHandler, 2000);
 
       // Set up packet listeners
       // this.APClient.addListener(SERVER_PACKET_TYPE.PRINT, this.printHandler);
@@ -108,8 +108,8 @@ class ArchipelagoInterface {
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 
-    // Set timeout to run again after five seconds
-    this.queueTimeout = setTimeout(this.queueHandler, 5000);
+    // Set timeout to run again after two seconds
+    this.queueTimeout = setTimeout(this.queueHandler, 2000);
   };
 
   /**
@@ -131,6 +131,7 @@ class ArchipelagoInterface {
    * @returns {Promise<void>}
    */
   printJSONHandler = async (packet, rawMessage) => {
+    console.log("Raw Message:\n" + rawMessage);
     let message = { type: 'chat', content: '', };
 
     if (!['ItemSend', 'ItemCheat', 'Hint'].includes(packet.type)) {
@@ -138,7 +139,7 @@ class ArchipelagoInterface {
       this.messageQueue.push(message);
       return;
     }
-
+    message.content += "```ansi\n";
     packet.data.forEach((part) => {
       // Plain text parts do not have a "type" property
       if (!part.hasOwnProperty('type') && part.hasOwnProperty('text')) {
@@ -148,12 +149,30 @@ class ArchipelagoInterface {
 
       switch(part.type){
         case 'player_id':
-          message.content += '**'+this.APClient.players.alias(parseInt(part.text, 10))+'**';
+          message.content += '\u001b[1;37m'+this.APClient.players.alias(parseInt(part.text, 10))+'\u001b[0m';
           break;
 
         case 'item_id':
           const itemName = this.APClient.players.get(packet.receiving).item(parseInt(part.text, 10));
-          message.content += `**${itemName}**`;
+	 
+	        switch(part?.flags){
+	          case 0b001:
+	            message.content += "\u001b[1;4;33m";
+	            break;
+	          case 0b010:
+	            message.content += "\u001b[1;34m";
+	            break;
+	          case 0b100:
+	            message.content += "\u001b[1;35m";
+	            break;
+	          default:
+	            message.content += "\u001b[1;36m";
+	            break;
+	        }
+
+          message.content += `${itemName}`;
+
+	        message.content += "\u001b[0m"
 
           // Identify this message as containing an item
           if (message.type !== 'progression') { message.type = 'item'; }
@@ -164,7 +183,7 @@ class ArchipelagoInterface {
 
         case 'location_id':
           const locationName = this.APClient.players.get(packet.item.player).location(parseInt(part.text, 10));
-          message.content += `**${locationName}**`;
+          message.content += `\u001b[1;32m${locationName}\u001b[0m`;
           break;
 
         case 'color':
@@ -179,7 +198,11 @@ class ArchipelagoInterface {
 
     // Identify hint messages
     if (rawMessage.includes('[Hint]')) { message.type = 'hint'; }
+    
+    message.content += "\n```";
 
+    console.log("Processed Message of type " + message.type);
+    console.log(message.content);
     this.messageQueue.push(message);
   };
 
