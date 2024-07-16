@@ -20,7 +20,7 @@ class ArchipelagoInterface {
 
     // Controls which messages should be printed to the channel
     this.showHints = true;
-    this.showItems = true;
+    this.showItems = false;
     this.showProgression = true;
     this.showChat = false;
 
@@ -131,7 +131,7 @@ class ArchipelagoInterface {
    * @returns {Promise<void>}
    */
   printJSONHandler = async (packet, rawMessage) => {
-    console.log("Raw Message:\n" + rawMessage);
+    console.log('Raw Message:\n' + rawMessage);
     let message = { type: 'chat', content: '', };
 
     if (!['ItemSend', 'ItemCheat', 'Hint'].includes(packet.type)) {
@@ -139,7 +139,7 @@ class ArchipelagoInterface {
       this.messageQueue.push(message);
       return;
     }
-    message.content += "```ansi\n";
+    message.content += '```ansi\n';
     packet.data.forEach((part) => {
       // Plain text parts do not have a "type" property
       if (!part.hasOwnProperty('type') && part.hasOwnProperty('text')) {
@@ -157,22 +157,22 @@ class ArchipelagoInterface {
 	 
 	        switch(part?.flags){
 	          case 0b001:
-	            message.content += "\u001b[1;4;33m";
+	            message.content += '\u001b[1;4;33m';
 	            break;
 	          case 0b010:
-	            message.content += "\u001b[1;34m";
+	            message.content += '\u001b[1;34m';
 	            break;
 	          case 0b100:
-	            message.content += "\u001b[1;35m";
+	            message.content += '\u001b[1;35m';
 	            break;
 	          default:
-	            message.content += "\u001b[1;36m";
+	            message.content += '\u001b[1;36m';
 	            break;
 	        }
 
           message.content += `${itemName}`;
 
-	        message.content += "\u001b[0m"
+	        message.content += '\u001b[0m';
 
           // Identify this message as containing an item
           if (message.type !== 'progression') { message.type = 'item'; }
@@ -199,9 +199,9 @@ class ArchipelagoInterface {
     // Identify hint messages
     if (rawMessage.includes('[Hint]')) { message.type = 'hint'; }
     
-    message.content += "\n```";
+    message.content += '\n```';
 
-    console.log("Processed Message of type " + message.type);
+    console.log('Processed Message of type ' + message.type);
     console.log(message.content);
     this.messageQueue.push(message);
   };

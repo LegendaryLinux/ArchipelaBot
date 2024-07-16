@@ -34,13 +34,13 @@ module.exports = {
         password = interaction.options.getString('password', false) ?? null;
 
         if (serverAddress === null) {
-          serverAddress = config.serverAddress ?? "127.0.0.1";    
+          serverAddress = config.serverAddress ?? '127.0.0.1';    
         }
         if (port === null) {
           port = Number(config.port) ?? 12345;
         }
         if (slotName === null) {
-          slotName = config.slotName ?? "no name";
+          slotName = config.slotName ?? 'no name';
         }
         if (password === null) {
           password = config.password ?? null;
@@ -49,15 +49,7 @@ module.exports = {
         if (interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
           return interaction.reply({
             content: 'An Archipelago game is already being monitored in this channel ' +
-              'and must be disconnected before a new game can be monitored.',
-            ephemeral: true,
-          });
-        }
-
-        if (serverAddress === 'archipelago.gg') {
-          return interaction.reply({
-            content: 'This bot connot be used with the official Archipelago server. ' +
-              'Please to a self hosted server.',
+              'and must be disconnected or cleared before a new game can be monitored.',
             ephemeral: true,
           });
         }
@@ -83,21 +75,21 @@ module.exports = {
             // Until then, the following will run forever.
 
             // Make this run until not longer connected to the AP server.
-	          while (APInterface.APClient.status === 'Connected') {	
+            while (APInterface.APClient.status === 'Connected') {
               //console.log("Still connected to server");
               await new Promise((resolve) => (setTimeout(resolve, 5000)));
-		        }
+            }
 
             await interaction.reply({
-		          content: `Disconnected from AP server at ${serverAddress}.`,
-		          ephemeral: false,
-		        });
+              content: `Disconnected from AP server at ${serverAddress}.`,
+              ephemeral: false,
+            });
 
             return setTimeout(() => {
-              console.log("Lost connection with AP server.");
+              console.log('Lost connection with AP server.');
               if (interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
                 interaction.client.tempData.apInterfaces.get(interaction.channel.id).disconnect();
-                interaction.client.tempData.apInterfaces.delete(interaction.channel.id);
+                // interaction.client.tempData.apInterfaces.delete(interaction.channel.id); //do not delete data
               }
             }, 5000);
           }
@@ -128,6 +120,29 @@ module.exports = {
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).disconnect();
         interaction.client.tempData.apInterfaces.delete(interaction.channel.id);
         return interaction.reply('Disconnected from Archipelago game.');
+      },
+    },
+    {
+      commandBuilder: new SlashCommandBuilder()
+        .setName('ap-reload')
+        .setDescription('Reload the currently connected monitored game in this channel')
+        .setDMPermission(false),
+      async execute(interaction) {
+        // Notify the user if there is no game being monitored in the current text channel
+        if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
+          return interaction.reply({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
+        }
+
+        // Disconnect the ArchipelagoInterface from the game and do not destroy the object in tempData
+        interaction.client.tempData.apInterfaces.get(interaction.channel.id).disconnect();
+        interaction.client.tempData.apInterfaces.get(interaction.channel.id).connect();
+        if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
+          return interaction.reply('Failed to reload Archipelago game.');
+        }
+        return interaction.reply('Reloaded Archipelago game.');
       },
     },
     {
