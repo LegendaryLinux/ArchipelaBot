@@ -28,7 +28,7 @@ module.exports = {
           .setDescription('Optional password required to connect to the server')
           .setRequired(false)),
       async execute(interaction) {
-        serverAddress = interaction.options.getString('server-address', false) ?? null;
+        serverAddress = interaction.options.getString('server-address', false) ?? null; //todo write to temp data?
         port = interaction.options.getNumber('port', false) ?? null;
         slotName = interaction.options.getString('slot-name', false) ?? null;
         password = interaction.options.getString('password', false) ?? null;
@@ -122,29 +122,7 @@ module.exports = {
         return interaction.reply('Disconnected from Archipelago game.');
       },
     },
-    {
-      commandBuilder: new SlashCommandBuilder()
-        .setName('ap-reload')
-        .setDescription('Reload the currently connected monitored game in this channel')
-        .setDMPermission(false),
-      async execute(interaction) {
-        // Notify the user if there is no game being monitored in the current text channel
-        if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.reply({
-            content: 'There is no Archipelago game being monitored in this channel.',
-            ephemeral: true,
-          });
-        }
-
-        // Disconnect the ArchipelagoInterface from the game and do not destroy the object in tempData
-        interaction.client.tempData.apInterfaces.get(interaction.channel.id).disconnect();
-        interaction.client.tempData.apInterfaces.get(interaction.channel.id).connect();
-        if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
-          return interaction.reply('Failed to reload Archipelago game.');
-        }
-        return interaction.reply('Reloaded Archipelago game.');
-      },
-    },
+    // {}, todo: add ap-reset
     {
       commandBuilder: new SlashCommandBuilder()
         .setName('ap-set-alias')

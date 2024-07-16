@@ -22,6 +22,7 @@ class ArchipelagoInterface {
     this.showHints = true;
     this.showItems = false;
     this.showProgression = true;
+    this.showTraps = true;
     this.showChat = false;
 
     const connectionInfo = {
@@ -84,6 +85,11 @@ class ArchipelagoInterface {
         case 'progression':
         // Ignore progression messages if they should not be displayed
           if (!this.showProgression) { continue; }
+          break;
+
+        case 'trap':
+        // Ignore trap messages if they should not be displayed
+          if (!this.showTraps) { continue; }
           break;
 
         case 'chat':
@@ -162,7 +168,7 @@ class ArchipelagoInterface {
 	          case 0b010:
 	            message.content += '\u001b[1;34m';
 	            break;
-	          case 0b100:
+	          case 0b100:  // trap Items
 	            message.content += '\u001b[1;35m';
 	            break;
 	          default:
@@ -175,10 +181,13 @@ class ArchipelagoInterface {
 	        message.content += '\u001b[0m';
 
           // Identify this message as containing an item
-          if (message.type !== 'progression') { message.type = 'item'; }
+          if (message.type !== 'progression' && message.type !== 'trap') { message.type = 'item'; }
 
           // Identify if this message contains a progression item
           if (part?.flags === 0b001) { message.type = 'progression'; }
+
+          // Identify if this message contains a trap item
+          if (part?.flags === 0b100) { message.type = 'trap'; }
           break;
 
         case 'location_id':
@@ -232,6 +241,14 @@ class ArchipelagoInterface {
     clearTimeout(this.queueTimeout);
     this.APClient.disconnect();
   };
+
+  // /** keep connection details for reconnect command todo ??????? yeah I'm cooking
+  //  * @param {String} address
+  //  * @param {Number} port
+  //  * @param {String} slotName
+  //  * @param {String|null} password
+  //  */
+  // details = (address, port, slotName, password) => {
 }
 
 module.exports = ArchipelagoInterface;
