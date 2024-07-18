@@ -23,7 +23,7 @@ class ArchipelagoInterface {
     this.showItems = false;
     this.showProgression = true;
     this.showTraps = true;
-    this.showChat = false;
+    this.showChat = true;
 
     const connectionInfo = {
       hostname: host,
@@ -241,14 +241,6 @@ class ArchipelagoInterface {
     clearTimeout(this.queueTimeout);
     this.APClient.disconnect();
   };
-
-  // /** keep connection details for reconnect command todo ??????? yeah I'm cooking
-  //  * @param {String} address
-  //  * @param {Number} port
-  //  * @param {String} slotName
-  //  * @param {String|null} password
-  //  */
-  // details = (address, port, slotName, password) => {
 }
 
 module.exports = ArchipelagoInterface;

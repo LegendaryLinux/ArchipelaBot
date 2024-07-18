@@ -28,13 +28,13 @@ module.exports = {
           .setDescription('Optional password required to connect to the server')
           .setRequired(false)),
       async execute(interaction) {
-        serverAddress = interaction.options.getString('server-address', false) ?? null; //todo write to temp data?
-        port = interaction.options.getNumber('port', false) ?? null;
-        slotName = interaction.options.getString('slot-name', false) ?? null;
-        password = interaction.options.getString('password', false) ?? null;
+        let serverAddress = interaction.options.getString('server-address', false) ?? null;
+        let port = interaction.options.getNumber('port', false) ?? null;
+        let slotName = interaction.options.getString('slot-name', false) ?? null;
+        let password = interaction.options.getString('password', false) ?? null;
 
         if (serverAddress === null) {
-          serverAddress = config.serverAddress ?? '127.0.0.1';    
+          serverAddress = config.serverAddress ?? '127.0.0.1';
         }
         if (port === null) {
           port = Number(config.port) ?? 12345;
@@ -55,7 +55,7 @@ module.exports = {
         }
         
         // Establish a connection to the Archipelago game
-        const APInterface = new ArchipelagoInterface(interaction.channel, serverAddress, port,
+        let APInterface = new ArchipelagoInterface(interaction.channel, serverAddress, port,
           slotName, password);
 
         // Check if the connection was successful every half second for five seconds
@@ -65,6 +65,18 @@ module.exports = {
 
           if (APInterface.APClient.status === 'Connected') {
             interaction.client.tempData.apInterfaces.set(interaction.channel.id, APInterface);
+            let channelID = interaction.channel.id;
+            console.log('log 1');
+            console.log(interaction.client.tempData);
+            interaction.client.tempData[channelID] = {}; //create empty channel ID object within tempData to store connection data
+            interaction.client.tempData[channelID].connectionDetails = new Map();
+            interaction.client.tempData[channelID].players = new Map();
+            interaction.client.tempData[channelID].connectionDetails.set('serverAddress', serverAddress);
+            interaction.client.tempData[channelID].connectionDetails.set('port', port);
+            interaction.client.tempData[channelID].connectionDetails.set('slotName', slotName);
+            interaction.client.tempData[channelID].connectionDetails.set('password', password);
+            console.log('log 2');
+            console.log(interaction.client.tempData);
             await interaction.reply({
               content: `Connected to ${serverAddress} with slot ${slotName}.`,
               ephemeral: false,
@@ -117,12 +129,84 @@ module.exports = {
         }
 
         // Disconnect the ArchipelagoInterface from the game and destroy the object in tempData
+        let channelID = interaction.channel.id;
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).disconnect();
         interaction.client.tempData.apInterfaces.delete(interaction.channel.id);
+        if (channelID in interaction.client.tempData) {
+          delete  interaction.client.tempData[channelID];
+        }
         return interaction.reply('Disconnected from Archipelago game.');
       },
     },
-    // {}, todo: add ap-reset
+    {
+      commandBuilder: new SlashCommandBuilder()
+        .setName('ap-reconnect')
+        .setDescription('Reconnect to the Archipelago game in the current text channel')
+        .setDMPermission(false),
+      async execute(interaction) {
+        // Stop command early if no game was monitored in the current text channel
+        if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
+          return interaction.reply({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
+        }
+        let channelID = interaction.channel.id;
+        interaction.client.tempData.apInterfaces.get(interaction.channel.id).disconnect();
+        let serverAddress = interaction.client.tempData[channelID].connectionDetails.get('serverAddress');
+        let port = interaction.client.tempData[channelID].connectionDetails.get('port');
+        let slotName = interaction.client.tempData[channelID].connectionDetails.get('slotName');
+        let password = interaction.client.tempData[channelID].connectionDetails.get('password');
+        console.log('log 3');
+        console.log(serverAddress + port + slotName + password);
+
+        let APInterface = new ArchipelagoInterface(interaction.channel, serverAddress, port,
+          slotName, password);
+
+        // Check if the connection was successful every half second for five seconds
+        for (let i=0; i<10; ++i){
+          // Wait half of a second
+          await new Promise((resolve) => (setTimeout(resolve, 500)));
+
+          if (APInterface.APClient.status === 'Connected') {
+            interaction.client.tempData.apInterfaces.set(interaction.channel.id, APInterface);
+            await interaction.reply({
+              content: `Reconnected to ${serverAddress} with slot ${slotName}.`,
+              ephemeral: false,
+            });
+
+            // TODO: The following does not work. status doesn't seem to be a good way to check
+            // for disconnects. Replace with auto reconnect behavior based on some pinging method.
+            // Until then, the following will run forever.
+
+            // Make this run until not longer connected to the AP server.
+            while (APInterface.APClient.status === 'Connected') {
+              //console.log("Still connected to server");
+              await new Promise((resolve) => (setTimeout(resolve, 5000)));
+            }
+
+            await interaction.reply({
+              content: `Disconnected from AP server at ${serverAddress}.`,
+              ephemeral: false,
+            });
+
+            return setTimeout(() => {
+              console.log('Lost connection with AP server.');
+              if (interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
+                interaction.client.tempData.apInterfaces.get(interaction.channel.id).disconnect();
+                // interaction.client.tempData.apInterfaces.delete(interaction.channel.id); //do not delete data
+              }
+            }, 5000);
+          }
+        }
+
+        // If the client fails to connect, notify the user
+        return interaction.reply({
+          content: `Unable to reconnect to AP server at ${serverAddress}.`,
+          ephemeral: false,
+        });
+      },
+    },
     {
       commandBuilder: new SlashCommandBuilder()
         .setName('ap-set-alias')
@@ -144,7 +228,8 @@ module.exports = {
         }
 
         // Associate the user with the specified alias
-        interaction.client.tempData.apInterfaces.get(interaction.channel.id).setPlayer(alias, interaction.user);
+        let channelID = interaction.channel.id;
+        interaction.client.tempData[channelID].players.set(alias, interaction.user);
         return interaction.reply(`Associated ${interaction.user} with alias ${alias}.`);
       },
     },
@@ -169,7 +254,8 @@ module.exports = {
         }
 
         // Determine if the alias has been set
-        const apInterface = interaction.client.tempData.apInterfaces.get(interaction.channel.id);
+        let channelID = interaction.channel.id;
+        const apInterface = interaction.client.tempData[channelID];
         if (apInterface.players.has(alias)) {
           // Only the user associated with an alias may unset it
           if (apInterface.players.get(alias) !== interaction.user) {
@@ -177,7 +263,7 @@ module.exports = {
           }
 
           // Disassociate the user from the specified alias
-          interaction.client.tempData.apInterfaces.get(interaction.channel.id).unsetPlayer(alias);
+          interaction.client.tempData[channelID].players.delete(alias);
           return interaction.reply(`${interaction.user} has been disassociated from ${alias}.`);
         }
 
@@ -190,6 +276,7 @@ module.exports = {
         .setDescription('Display a list of aliases for the game in the current channel')
         .setDMPermission(false),
       async execute(interaction) {
+        let channelID = interaction.channel.id;
         // Notify the user if there is no game being monitored in the current text channel
         if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
           return interaction.reply({
@@ -199,8 +286,8 @@ module.exports = {
         }
 
         // Display the list of aliases for the current channel's game
-        const aliases = interaction.client.tempData.apInterfaces.get(interaction.channel.id).players;
-        if (aliases.size === 0) {
+        const aliases = interaction.client.tempData[channelID].players;
+        if (!('players' in interaction.client.tempData[channelID])) {
           return interaction.reply('No aliases are currently assigned.');
         }
 
@@ -347,6 +434,44 @@ module.exports = {
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showItems = false;
         interaction.client.tempData.apInterfaces.get(interaction.channel.id).showProgression = false;
         return interaction.reply('Hiding all item messages.');
+      },
+    },
+    {
+      commandBuilder: new SlashCommandBuilder()
+        .setName('ap-show-traps')
+        .setDescription('Hide all item messages while connected to an AP game')
+        .setDMPermission(false),
+      async execute(interaction) {
+        // Notify the user if there is no game being monitored in the current text channel
+        if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
+          return interaction.reply({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
+        }
+
+        // Set the APInterface to show chat messages
+        interaction.client.tempData.apInterfaces.get(interaction.channel.id).showTraps = true;
+        return interaction.reply('Showing trap item messages.');
+      },
+    },
+    {
+      commandBuilder: new SlashCommandBuilder()
+        .setName('ap-hide-traps')
+        .setDescription('Hide all item messages while connected to an AP game')
+        .setDMPermission(false),
+      async execute(interaction) {
+        // Notify the user if there is no game being monitored in the current text channel
+        if (!interaction.client.tempData.apInterfaces.has(interaction.channel.id)) {
+          return interaction.reply({
+            content: 'There is no Archipelago game being monitored in this channel.',
+            ephemeral: true,
+          });
+        }
+
+        // Set the APInterface to show chat messages
+        interaction.client.tempData.apInterfaces.get(interaction.channel.id).showTraps = false;
+        return interaction.reply('Hiding trap item messages.');
       },
     },
   ],
