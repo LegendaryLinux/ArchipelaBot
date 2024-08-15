@@ -60,6 +60,9 @@ npm install
 # Set up your config.json file
 vim config.json
 
+# Register application (slash) commands
+node scripts/registerSlashCommands.js
+
 # Run the bot
 node bot.js
 ```
