@@ -1,12 +1,16 @@
 const { Client, Events, GatewayIntentBits, Partials } = require('discord.js');
 const config = require('./config.json');
 const { cachePartial } = require('./lib');
+const { dbInit } = require('./database');
 const { generalErrorHandler } = require('./errorHandlers');
 const fs = require('fs');
 
 // Catch all unhandled errors
 process.on('uncaughtException', (err) => generalErrorHandler(err));
 process.on('unhandledRejection', (err) => generalErrorHandler(err));
+
+// Initialize database in memory
+dbInit();
 
 const client = new Client({
   partials: [ Partials.GuildMember, Partials.Message ],
@@ -16,6 +20,7 @@ const client = new Client({
 client.messageListeners = [];
 client.channelDeletedListeners = [];
 client.slashCommandCategories = [];
+client.routines = [];
 
 client.tempData = {
   apInterfaces: new Map(),
@@ -37,6 +42,12 @@ fs.readdirSync('./channelDeletedListeners').filter((file) => file.endsWith('.js'
 fs.readdirSync('./slashCommandCategories').filter((file) => file.endsWith('.js')).forEach((categoryFile) => {
   const slashCommandCategory = require(`./slashCommandCategories/${categoryFile}`);
   client.slashCommandCategories.push(slashCommandCategory);
+});
+
+// Load routines and run them once per hour
+fs.readdirSync('./routines').filter((file) => file.endsWith('.js')).forEach((routineFile) => {
+  const routine = require(`./routines/${routineFile}`);
+  setInterval(routine, 3600000);
 });
 
 // Run messages through the listeners
