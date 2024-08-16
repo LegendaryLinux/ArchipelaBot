@@ -160,7 +160,7 @@ module.exports = {
         if (
           !verifyIsAdmin(interaction.member) &&
           !interaction.member.permissions.has(PermissionFlagsBits.ManageChannels) &&
-          !interaction.member.permissions.has(PermissionFlagsBits.Flags.ManageMessages) &&
+          !interaction.member.permissions.has(PermissionFlagsBits.ManageMessages) &&
           !interaction.user.id !== readySystem.userId
         ) {
           return interaction.reply({
@@ -203,8 +203,8 @@ module.exports = {
           [readySystem.id],
         );
 
-        let content = '## Players:\n';
-        players.forEach((p) => content += `- ${p.isReady ? '✅' : '❌'} <@${p.userId}>`);
+        let content = '## Players:';
+        players.forEach((p) => content += `\n- ${p.isReady ? '✅' : '❌'} <@${p.userId}>`);
 
         return interaction.reply({
           content,
