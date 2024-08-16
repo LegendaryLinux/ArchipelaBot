@@ -69,6 +69,38 @@ module.exports = {
     },
     {
       commandBuilder: new SlashCommandBuilder()
+        .setName('ready-leave')
+        .setDescription('Leave a ready system in this channel.')
+        .setDMPermission(false),
+      async execute(interaction) {
+        // Find ready system for this channel
+        const readySystem = await dbQueryOne(
+          'SELECT id FROM readySystems WHERE guildId=? AND channelId=?',
+          [interaction.guild.id, interaction.channel.id],
+        );
+
+        // Inform the user if there is no ready system
+        if (!readySystem) {
+          return interaction.reply({
+            content: 'A ready system has not been created in this channel.',
+            ephemeral: true,
+          });
+        }
+
+        // Remove the user from the ready system
+        await dbExecute(
+          'DELETE FROM readyChecks WHERE readySystemId=? AND userId=?',
+          [readySystem.id, interaction.user.id],
+        );
+
+        return interaction.reply({
+          content: `${interaction.user} has left the game.`,
+          ephemeral: false,
+        });
+      }
+    },
+    {
+      commandBuilder: new SlashCommandBuilder()
         .setName('ready')
         .setDescription('Indicate you are ready to begin.')
         .setDMPermission(false),
@@ -83,6 +115,18 @@ module.exports = {
         if (!readySystem) {
           return interaction.reply({
             content: 'A ready system has not been created in this channel.',
+            ephemeral: true,
+          });
+        }
+
+        const isJoined = await dbQueryOne(
+          'SELECT 1 FROM readyChecks WHERE readySystemId=? AND userId=?',
+          [readySystem.id, interaction.user.id],
+        );
+
+        if (!isJoined) {
+          return interaction.reply({
+            content: 'You have not joined the ready system.',
             ephemeral: true,
           });
         }
@@ -126,6 +170,18 @@ module.exports = {
           });
         }
 
+        const isJoined = await dbQueryOne(
+          'SELECT 1 FROM readyChecks WHERE readySystemId=? AND userId=?',
+          [readySystem.id, interaction.user.id],
+        );
+
+        if (!isJoined) {
+          return interaction.reply({
+            content: 'You have not joined the ready system.',
+            ephemeral: true,
+          });
+        }
+
         await dbExecute(
           'UPDATE readyChecks SET isReady=0 WHERE readySystemId=? AND userId=?',
           [readySystem.id, interaction.member.id],
@@ -144,7 +200,7 @@ module.exports = {
       async execute(interaction) {
         // Find ready system for this channel
         const readySystem = await dbQueryOne(
-          'SELECT id FROM readySystems WHERE guildId=? AND channelId=?',
+          'SELECT id, userId FROM readySystems WHERE guildId=? AND channelId=?',
           [interaction.guild.id, interaction.channel.id],
         );
 
@@ -202,6 +258,13 @@ module.exports = {
           'SELECT userId, isReady FROM readyChecks WHERE readySystemId=?',
           [readySystem.id],
         );
+
+        if (!players) {
+          return interaction.reply({
+            content: 'No players have joined the ready system.',
+            ephemeral: true,
+          });
+        }
 
         let content = '## Players:';
         players.forEach((p) => content += `\n- ${p.isReady ? '✅' : '❌'} <@${p.userId}>`);
