@@ -38,7 +38,7 @@ module.exports = {
     {
       commandBuilder: new SlashCommandBuilder()
         .setName('ready-join')
-        .setDescription('Join a game in this channel.')
+        .setDescription('Join a ready system in this channel.')
         .setDMPermission(false),
       async execute(interaction) {
         // Find ready system for this channel
@@ -139,7 +139,7 @@ module.exports = {
     {
       commandBuilder: new SlashCommandBuilder()
         .setName('ready-cancel')
-        .setDescription('Cancel the game in this channel if one is present.')
+        .setDescription('Cancel the ready system in this channel if one is present.')
         .setDMPermission(false),
       async execute(interaction) {
         // Find ready system for this channel
@@ -181,7 +181,7 @@ module.exports = {
     {
       commandBuilder: new SlashCommandBuilder()
         .setName('ready-check')
-        .setDescription('Cancel the game in this channel if one is present.')
+        .setDescription('Cancel the ready system in this channel if one is present.')
         .setDMPermission(false),
       async execute(interaction) {
         // Find ready system for this channel

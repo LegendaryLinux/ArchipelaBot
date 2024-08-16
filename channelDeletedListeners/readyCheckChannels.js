@@ -8,8 +8,6 @@ const { dbQueryOne, dbExecute } = require('../database');
  * @returns {Promise<void>}
  */
 module.exports = async (client, channel) => {
-  console.log(channel.id);
-
   const readySystem = await dbQueryOne('SELECT id FROM readySystems WHERE channelId=?', [channel.id]);
   if (readySystem) {
     await dbExecute('DELETE FROM readyChecks WHERE readySystemId=?', [readySystem.id]);
