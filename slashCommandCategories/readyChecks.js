@@ -125,10 +125,10 @@ module.exports = {
         );
 
         if (!isJoined) {
-          return interaction.reply({
-            content: 'You have not joined the ready system.',
-            ephemeral: true,
-          });
+          await dbExecute(
+            'REPLACE INTO readyChecks (readySystemId, userId, isReady) VALUES (?, ?, 1)',
+            [readySystem.id, interaction.user.id]
+          );
         }
 
         await dbExecute(
