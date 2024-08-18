@@ -13,12 +13,13 @@ process.on('unhandledRejection', (err) => generalErrorHandler(err));
 dbInit();
 
 const client = new Client({
-  partials: [ Partials.GuildMember, Partials.Message ],
+  partials: [ Partials.GuildMember, Partials.Message, Partials.Channel ],
   intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.MessageContent],
+    GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates],
 });
 client.messageListeners = [];
 client.channelDeletedListeners = [];
+client.voiceStateListeners = [];
 client.slashCommandCategories = [];
 client.routines = [];
 
@@ -44,6 +45,12 @@ fs.readdirSync('./slashCommandCategories').filter((file) => file.endsWith('.js')
   client.slashCommandCategories.push(slashCommandCategory);
 });
 
+// Load voice state listener files
+fs.readdirSync('./voiceStateListeners').filter((file) => file.endsWith('.js')).forEach((listenerFile) => {
+  const listener = require(`./voiceStateListeners/${listenerFile}`);
+  client.voiceStateListeners.push(listener);
+});
+
 // Load routines and run them once per hour
 fs.readdirSync('./routines').filter((file) => file.endsWith('.js')).forEach((routineFile) => {
   const routine = require(`./routines/${routineFile}`);
@@ -67,6 +74,13 @@ client.on(Events.MessageCreate, async (msg) => {
 // Run channelDelete events through their listeners
 client.on(Events.ChannelDelete, async(channel) => {
   client.channelDeletedListeners.forEach((listener) => listener(client, channel));
+});
+
+// Run the voice states through the listeners
+client.on(Events.VoiceStateUpdate, async(oldState, newState) => {
+  oldState.member = await cachePartial(oldState.member);
+  newState.member = await cachePartial(newState.member);
+  client.voiceStateListeners.forEach((listener) => listener(client, oldState, newState));
 });
 
 // Run the interactions through the interactionListeners
