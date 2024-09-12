@@ -23,6 +23,7 @@ class ArchipelagoInterface {
     this.showItems = true;
     this.showProgression = true;
     this.showChat = true;
+    this.showNonAliased = true;
 
     const connectionInfo = {
       hostname: host,
@@ -63,17 +64,14 @@ class ArchipelagoInterface {
     let messages = [];
 
     for (let message of this.messageQueue) {
+      // Replace player names with Discord User objects
+      let hasKnownAlias = this.handleAliases(message)
+      if (!this.showNonAliased && !hasKnownAlias) { continue; }
+
       switch(message.type) {
         case 'hint':
         // Ignore hint messages if they should not be displayed
           if (!this.showHints) { continue; }
-
-          // Replace player names with Discord User objects
-          for (let alias of this.players.keys()) {
-            if (message.content.includes(alias)) {
-              message.content = message.content.replace(alias, this.players.get(alias));
-            }
-          }
           break;
 
         case 'item':
@@ -209,6 +207,23 @@ class ArchipelagoInterface {
     clearTimeout(this.queueTimeout);
     this.APClient.disconnect();
   };
+
+  /**
+   * Replaces all known aliases by their Discord User objects in the passed message
+   * @param {string} alias
+   * @returns {boolean} Whether an alias was found
+   */
+  handleAliases = (message) => {
+    let hasKnownAlias = false
+    for (let alias of this.players.keys()) {
+      if (message.content.includes(alias)) {
+        message.content = message.content.replace(alias, this.players.get(alias));
+        hasKnownAlias = true
+      }
+    }
+    return hasKnownAlias;
+  }
+
 }
 
 module.exports = ArchipelagoInterface;
