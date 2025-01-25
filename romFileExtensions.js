@@ -1,6 +1,6 @@
 module.exports = [
   // General ROM File Extensions
-  'bin',  // Generic binary ROM file
+  // 'bin',  // Generic binary ROM file
   'rom',  // Generic ROM image file
   'iso',  // CD/DVD disc image (used for disc-based consoles like PS1, PS2)
   'img',  // Disk image file
@@ -31,7 +31,8 @@ module.exports = [
   'xci', 'nsp', 'ncz',
 
   // Sega Genesis / Mega Drive
-  'smd', 'gen', 'md',
+  // 'smd', 'gen', 'md',
+  'smd', 'gen',
 
   // Sega Master System
   'sms',
