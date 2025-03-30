@@ -22,9 +22,10 @@ client.login(config.token).then(async () => {
     console.log(`Members: ${guild.memberCount}`);
 
     if (!whitelist.includes(guild.id.toString())) {
-      console.log(`Leaving ${guild.name}.\n`);
+      console.log(`Leaving ${guild.name}.`);
       await guild.leave();
     }
+    console.log('---');
   }
 
   return client.destroy();
