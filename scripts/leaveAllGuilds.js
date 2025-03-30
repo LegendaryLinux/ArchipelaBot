@@ -19,10 +19,10 @@ client.login(config.token).then(async () => {
   for (let guild of Array.from(client.guilds.cache.values())){
     await guild.fetch();
     console.log(`${guild.name} (${guild.id})`);
-    console.log(`Members: ${guild.memberCount}\n`);
+    console.log(`Members: ${guild.memberCount}`);
 
     if (!whitelist.includes(guild.id.toString())) {
-      console.log(`Leaving ${guild.name}.`);
+      console.log(`Leaving ${guild.name}.\n`);
       await guild.leave();
     }
   }
