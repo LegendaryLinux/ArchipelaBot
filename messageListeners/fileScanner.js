@@ -17,7 +17,7 @@ module.exports = async (client, message) => {
     const moderatorRole = roles.find((r) => r.name === 'Moderator');
 
     const channels = await message.guild.channels.fetch();
-    const modChannel = channels.find((c) => c.name === 'problem-report-history');
+    const modChannel = channels.find((c) => c.name === 'mod-zone-chat');
 
     const romFileNames = [];
     message.attachments.each((attachment) => {
@@ -30,7 +30,8 @@ module.exports = async (client, message) => {
     if (romFileNames.length > 0) {
       await message.channel.send({
         content: `${message.author}: Do not post links to ROM files or other copyrighted content.\n` +
-          `The ${moderatorRole} team has been alerted to this incident.`
+          `The ${moderatorRole} team has been alerted to this incident.\n` +
+          `The potentially problematic file(s) in question were:\n- ${romFileNames.join('\n- ')}`
       });
 
       await modChannel.send({
