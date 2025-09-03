@@ -1,5 +1,6 @@
 const {generalErrorHandler} = require('../errorHandlers');
 const romFileExtensions = require('../romFileExtensions');
+const {PermissionsBitField} = require('discord.js');
 
 const isRomFile = (filename) => {
   const fileExtension = filename.split('.').pop().toLowerCase();
@@ -8,6 +9,12 @@ const isRomFile = (filename) => {
 
 module.exports = async (client, message) => {
   try{
+    if (!message.channel.permissionsFor(message.guild.members.me).has(PermissionsBitField.Flags.ManageMessages)) {
+      console.warn(`ManageMessages permission is missing in guild ${message.guild.name} (${message.guild.id}) / ` +
+          `channel ${message.channel.name} (${message.channel.id}).`);
+      return;
+    }
+
     const roles = await message.guild.roles.fetch();
     const moderatorRole = roles.find((r) => r.name === 'Moderator');
 
