@@ -2,13 +2,8 @@ const {generalErrorHandler} = require('../errorHandlers');
 const romFileExtensions = require('../romFileExtensions');
 
 const isRomFile = (filename) => {
-  const parts = filename.split('.');
-  for (const part of parts) {
-    // Rom extension is present in filename
-    if (romFileExtensions.indexOf(part) !== -1) { return true; }
-  }
-  // Doesn't look like a ROM file
-  return false;
+  const fileExtension = filename.split('.').pop().toLowerCase();
+  return romFileExtensions.includes(fileExtension);
 };
 
 module.exports = async (client, message) => {
@@ -42,9 +37,6 @@ module.exports = async (client, message) => {
       return message.delete();
     }
   } catch (error) {
-    message.channel.send('Something went wrong while trying to analyze your file. It has been deleted ' +
-      'for safety purposes.');
-    message.delete();
     generalErrorHandler(error);
   }
 };

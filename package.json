@@ -8,18 +8,13 @@
     "registerCommands": "node scripts/registerSlashCommands.js"
   },
   "dependencies": {
-    "archipelago.js": "^1.2.0",
-    "ascii-table3": "^0.9.0",
-    "axios": "^1.7.9",
-    "discord.js": "^14.17.3",
-    "form-data": "^4.0.1",
-    "moment-timezone": "^0.5.46",
+    "axios": "^1.11.0",
+    "discord.js": "^14.22.1",
+    "form-data": "^4.0.4",
     "sqlite3": "^5.1.7",
-    "tmp": "^0.2.3",
-    "uuid": "^9.0.1"
+    "tmp": "^0.2.5"
   },
   "devDependencies": {
-    "depcheck": "^1.4.7",
-    "eslint": "^8.57.1"
+    "eslint": "^9.34.0"
   }
 }
