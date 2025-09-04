@@ -36,12 +36,12 @@ module.exports = async (client, message) => {
           `The potentially problematic file(s) in question were:\n- ${romFileNames.join('\n- ')}`
       });
 
+      await message.delete();
+
       await modChannel.send({
         content: `${moderatorRole}: ${message.author} has just posted a potentially pirated file ` +
           `in ${message.channel}.\n**Problem files:**\n- ${romFileNames.join('\n- ')}`
       });
-
-      return message.delete();
     }
   } catch (error) {
     generalErrorHandler(error);
