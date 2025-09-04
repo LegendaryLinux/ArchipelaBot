@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { dbExecute, dbQueryOne, dbQueryAll } = require('../database');
 const { verifyIsAdmin } = require('../lib');
 
@@ -17,7 +17,7 @@ module.exports = {
         if (existingGame) {
           return interaction.reply({
             content: 'A ready system has already been created in this channel.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -51,7 +51,7 @@ module.exports = {
         if (!readySystem) {
           return interaction.reply({
             content: 'A ready system has not been created in this channel.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -63,7 +63,6 @@ module.exports = {
 
         return interaction.reply({
           content: `${interaction.user} has joined the game.`,
-          ephemeral: false,
         });
       }
     },
@@ -83,7 +82,7 @@ module.exports = {
         if (!readySystem) {
           return interaction.reply({
             content: 'A ready system has not been created in this channel.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -95,7 +94,6 @@ module.exports = {
 
         return interaction.reply({
           content: `${interaction.user} has left the game.`,
-          ephemeral: false,
         });
       }
     },
@@ -115,7 +113,7 @@ module.exports = {
         if (!readySystem) {
           return interaction.reply({
             content: 'A ready system has not been created in this channel.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -166,7 +164,7 @@ module.exports = {
         if (!readySystem) {
           return interaction.reply({
             content: 'A ready system has not been created in this channel.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -178,7 +176,7 @@ module.exports = {
         if (!isJoined) {
           return interaction.reply({
             content: 'You have not joined the ready system.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -208,7 +206,7 @@ module.exports = {
         if (!readySystem) {
           return interaction.reply({
             content: 'A ready system has not been created in this channel.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -221,7 +219,7 @@ module.exports = {
         ) {
           return interaction.reply({
             content: `Only <@${readySystem.userId}> or an otherwise privileged user may cancel the game.`,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -230,7 +228,6 @@ module.exports = {
 
         return interaction.reply({
           content: `${interaction.user} has cancelled the ready system.`,
-          ephemeral: false,
         });
       }
     },
@@ -250,7 +247,7 @@ module.exports = {
         if (!readySystem) {
           return interaction.reply({
             content: 'A ready system has not been created in this channel.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
@@ -262,7 +259,7 @@ module.exports = {
         if (!players) {
           return interaction.reply({
             content: 'No players have joined the ready system.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
 
