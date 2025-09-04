@@ -2,7 +2,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const tmp = require('tmp');
 const fs = require('fs');
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, InteractionContextType } = require('discord.js');
 
 const API_ENDPOINT = 'https://archipelago.gg/api/generate';
 
@@ -13,7 +13,7 @@ module.exports = {
       commandBuilder: new SlashCommandBuilder()
         .setName('ap-generate')
         .setDescription('Generate a game based on an uploaded file.')
-        .setDMPermission(true)
+        .setContexts(InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel)
         .addAttachmentOption((opt) => opt
           .setName('config-file')
           .setDescription('Archipelago yaml, json, or zip file')

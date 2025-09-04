@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, InteractionContextType } = require('discord.js');
 const { dbExecute, dbQueryOne, dbQueryAll } = require('../database');
 const { verifyIsAdmin } = require('../lib');
 
@@ -9,7 +9,7 @@ module.exports = {
       commandBuilder: new SlashCommandBuilder()
         .setName('ready-create')
         .setDescription('Create a ready system in this channel.')
-        .setDMPermission(false),
+        .setContexts(InteractionContextType.Guild),
       async execute(interaction) {
         // Determine if a game is already running in this channel
         let sql = 'SELECT 1 FROM readySystems WHERE guildId=? AND channelId=?';
@@ -39,7 +39,7 @@ module.exports = {
       commandBuilder: new SlashCommandBuilder()
         .setName('ready-join')
         .setDescription('Join a ready system in this channel.')
-        .setDMPermission(false),
+        .setContexts(InteractionContextType.Guild),
       async execute(interaction) {
         // Find ready system for this channel
         const readySystem = await dbQueryOne(
@@ -70,7 +70,7 @@ module.exports = {
       commandBuilder: new SlashCommandBuilder()
         .setName('ready-leave')
         .setDescription('Leave a ready system in this channel.')
-        .setDMPermission(false),
+        .setContexts(InteractionContextType.Guild),
       async execute(interaction) {
         // Find ready system for this channel
         const readySystem = await dbQueryOne(
@@ -101,7 +101,7 @@ module.exports = {
       commandBuilder: new SlashCommandBuilder()
         .setName('ready')
         .setDescription('Indicate you are ready to begin.')
-        .setDMPermission(false),
+        .setContexts(InteractionContextType.Guild),
       async execute(interaction) {
         // Find ready system for this channel
         const readySystem = await dbQueryOne(
@@ -152,7 +152,7 @@ module.exports = {
       commandBuilder: new SlashCommandBuilder()
         .setName('unready')
         .setDescription('Indicate you are no longer ready to begin.')
-        .setDMPermission(false),
+        .setContexts(InteractionContextType.Guild),
       async execute(interaction) {
         // Find ready system for this channel
         const readySystem = await dbQueryOne(
@@ -194,7 +194,7 @@ module.exports = {
       commandBuilder: new SlashCommandBuilder()
         .setName('ready-cancel')
         .setDescription('Cancel the ready system in this channel if one is present.')
-        .setDMPermission(false),
+        .setContexts(InteractionContextType.Guild),
       async execute(interaction) {
         // Find ready system for this channel
         const readySystem = await dbQueryOne(
@@ -235,7 +235,7 @@ module.exports = {
       commandBuilder: new SlashCommandBuilder()
         .setName('ready-check')
         .setDescription('Cancel the ready system in this channel if one is present.')
-        .setDMPermission(false),
+        .setContexts(InteractionContextType.Guild),
       async execute(interaction) {
         // Find ready system for this channel
         const readySystem = await dbQueryOne(
