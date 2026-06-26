@@ -7,6 +7,15 @@ const isRomFile = (filename) => {
   return romFileExtensions.includes(fileExtension);
 };
 
+const roleData = {
+  roles: null,
+  lastUpdate: 0,
+};
+const channelData = {
+  channels: null,
+  lastUpdate: 0,
+};
+
 module.exports = async (client, message) => {
   try{
     if (!message.channel.permissionsFor(message.guild.members.me).has(PermissionsBitField.Flags.ManageMessages)) {
@@ -15,11 +24,17 @@ module.exports = async (client, message) => {
       return;
     }
 
-    const roles = await message.guild.roles.fetch();
-    const moderatorRole = roles.find((r) => r.name === 'Moderator');
+    if (!roleData.roles || roleData.lastUpdate < (new Date().getTime() - 450000)) {
+      roleData.roles = await message.guild.roles.fetch();
+      roleData.lastUpdate = new Date().getTime();
+    }
+    const moderatorRole = roleData.roles.find((r) => r.name === 'Moderator');
 
-    const channels = await message.guild.channels.fetch();
-    const modChannel = channels.find((c) => c.name === 'mod-zone-chat');
+    if (!channelData.channels || channelData.lastUpdate < (new Date().getTime() - 450000)) {
+      channelData.channels = await message.guild.channels.fetch();
+      channelData.lastUpdate = new Date().getTime();
+    }
+    const modChannel = channelData.channels.find((c) => c.name === 'mod-zone-chat');
 
     const romFileNames = [];
     message.attachments.each((attachment) => {
