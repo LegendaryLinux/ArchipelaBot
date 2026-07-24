@@ -7,15 +7,6 @@ const isRomFile = (filename) => {
   return romFileExtensions.includes(fileExtension);
 };
 
-const roleData = {
-  roles: null,
-  lastUpdate: 0,
-};
-const channelData = {
-  channels: null,
-  lastUpdate: 0,
-};
-
 module.exports = async (client, message) => {
   try{
     if (!message.channel.permissionsFor(message.guild.members.me).has(PermissionsBitField.Flags.ManageMessages)) {
@@ -24,17 +15,17 @@ module.exports = async (client, message) => {
       return;
     }
 
-    if (!roleData.roles || roleData.lastUpdate < (new Date().getTime() - 450000)) {
-      roleData.roles = await message.guild.roles.fetch();
-      roleData.lastUpdate = new Date().getTime();
+    let moderatorRole = message.guild.roles.cache.find((r) => r.name === 'Moderator');
+    if (!moderatorRole) {
+      const roles = await message.guild.roles.fetch();
+      moderatorRole = roles.find((r) => r.name === 'Moderator') || null;
     }
-    const moderatorRole = roleData.roles.find((r) => r.name === 'Moderator');
 
-    if (!channelData.channels || channelData.lastUpdate < (new Date().getTime() - 450000)) {
-      channelData.channels = await message.guild.channels.fetch();
-      channelData.lastUpdate = new Date().getTime();
+    let modChannel = message.guild.channels.cache.find((c) => c.name === 'mod-zone-chat');
+    if (!modChannel) {
+      const channels = await message.guild.channels.fetch();
+      modChannel = channels.find((c) => c.name === 'mod-zone-chat') || null;
     }
-    const modChannel = channelData.channels.find((c) => c.name === 'mod-zone-chat');
 
     const romFileNames = [];
     message.attachments.each((attachment) => {
@@ -53,10 +44,12 @@ module.exports = async (client, message) => {
 
       await message.delete();
 
-      await modChannel.send({
-        content: `${moderatorRole}: ${message.author} has just posted a potentially pirated file ` +
-          `in ${message.channel}.\n**Problem files:**\n- ${romFileNames.join('\n- ')}`
-      });
+      if (modChannel) {
+        await modChannel.send({
+          content: `${moderatorRole}: ${message.author} has just posted a potentially pirated file ` +
+            `in ${message.channel}.\n**Problem files:**\n- ${romFileNames.join('\n- ')}`
+        });
+      }
     }
   } catch (error) {
     generalErrorHandler(error);
